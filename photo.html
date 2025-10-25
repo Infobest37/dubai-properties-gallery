@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dubai Photos</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #2c3e50; color: white; font-family: Arial; }
+        .photo { width: 100%; margin: 10px 0; border-radius: 10px; cursor: pointer; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .btn { background: gold; color: black; padding: 15px; border: none; border-radius: 10px; margin: 20px auto; display: block; }
+
+        /* Стили для увеличения фото */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%; }
+        .modal-img { width: 100%; height: auto; border-radius: 10px; }
+        .close { position: absolute; top: 15px; right: 15px; color: white; font-size: 30px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏙️ Dubai Properties</h1>
+        <p id="count">Loading photos...</p>
+    </div>
+    <div id="gallery"></div>
+    <button class="btn" onclick="window.Telegram.WebApp.close()">❌ Close</button>
+
+    <!-- Окно для увеличенного фото -->
+    <div id="modal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div class="modal-content">
+            <img id="modal-img" class="modal-img">
+        </div>
+    </div>
+
+    <script>
+        // Получаем фото из URL
+        const url = new URLSearchParams(window.location.search);
+        const photos = url.get('photos');
+
+        if (photos) {
+            try {
+                const photoList = JSON.parse(decodeURIComponent(photos));
+                document.getElementById('count').textContent = photoList.length + ' photos';
+
+                photoList.forEach((photoUrl, index) => {
+                    const img = document.createElement('img');
+                    img.src = photoUrl;
+                    img.className = 'photo';
+                    img.onclick = () => openModal(photoUrl);
+                    document.getElementById('gallery').appendChild(img);
+                });
+            } catch (e) {
+                document.getElementById('gallery').innerHTML = '<p>Error loading photos</p>';
+            }
+        }
+
+        // Функции для увеличения фото
+        function openModal(photoUrl) {
+            document.getElementById('modal-img').src = photoUrl;
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Закрытие по клику вне фото
+        document.getElementById('modal').onclick = function(e) {
+            if (e.target === this) closeModal();
+        }
+
+        window.Telegram.WebApp.expand();
+        window.Telegram.WebApp.ready();
+    </script>
+</body>
+</html>
